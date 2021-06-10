@@ -1,4 +1,4 @@
-Django==1.11.29
+Django==2.2.24
 envoy==0.0.3
 lxml==3.7.2
 PyMySQL==0.10.1
