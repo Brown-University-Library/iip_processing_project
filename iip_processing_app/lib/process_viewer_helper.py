@@ -25,7 +25,7 @@ class UserGrabber(object):
         if shib_checker.validate_user( meta_dct ):
             log.debug( 'validated via shib' )
             user = self.grab_good_user()
-        elif meta_dct['SERVER_NAME'] is '127.0.0.1' and settings.DEBUG is True:
+        elif meta_dct['SERVER_NAME'] == '127.0.0.1' and settings.DEBUG is True:
             log.debug( 'validated via localdev' )
             user = self.grab_good_user()
         else:
