@@ -1,0 +1,9 @@
+Django~=1.11.0
+envoy
+lxml
+PyMySQL
+redis
+requests
+rq
+shellvars-py
+solrpy
