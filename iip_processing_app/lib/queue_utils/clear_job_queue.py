@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-
 import os, pprint
 import redis, rq
 
 
-QUEUE_NAME = unicode( os.environ['IIP_PRC__QUEUE_NAME'] )
+QUEUE_NAME = os.environ['IIP_PRC__QUEUE_NAME']
 
 
 q = rq.Queue( QUEUE_NAME, connection=redis.Redis() )

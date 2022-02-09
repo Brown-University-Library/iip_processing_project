@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-
 """
 Triggered by:
 -  views.gh_inscription_watcher() -> GHHelper.handle_inscription_update()
@@ -21,7 +19,7 @@ from lxml import etree
 log = logging.getLogger(__name__)
 if not logging._handlers:  # true when module accessed by queue-jobs
     worker_config_dct = json.loads( os.environ['IIP_PRC__JOB_LOG_CONFIG_JSON'] )
-    worker_config_dct['loggers']['iip_processing_app']['level'] = unicode( os.environ[u'IIP_PRC__LOG_LEVEL'] )
+    worker_config_dct['loggers']['iip_processing_app']['level'] = os.environ[u'IIP_PRC__LOG_LEVEL']
     logging.config.dictConfig( worker_config_dct )
 
 
@@ -30,7 +28,7 @@ class Puller( object ):
 
     def __init__( self ):
         """ Settings. """
-        self.GIT_CLONED_DIR_PATH = unicode( os.environ['IIP_PRC__CLONED_INSCRIPTIONS_PATH'] )
+        self.GIT_CLONED_DIR_PATH = os.environ['IIP_PRC__CLONED_INSCRIPTIONS_PATH']
 
     def call_git_pull( self ):
         """ Runs git_pull.
@@ -70,11 +68,11 @@ class StatusBackupper( object ):
 
     def __init__( self ):
         """ Settings. """
-        self.SOLR_URL = unicode( os.environ['IIP_PRC__SOLR_URL'] )
-        self.DISPLAY_STATUSES_BACKUP_DIR = unicode( os.environ['IIP_PRC__DISPLAY_STATUSES_BACKUP_DIR'] )
-        self.STATUSES_GIST_URL = unicode( os.environ['IIP_PRC__STATUSES_GIST_URL'] )
-        self.STATUSES_GIST_USERNAME = unicode( os.environ['IIP_PRC__STATUSES_GIST_USERNAME'] )
-        self.STATUSES_GIST_PASSWORD = unicode( os.environ['IIP_PRC__STATUSES_GIST_PASSWORD'] )
+        self.SOLR_URL = os.environ['IIP_PRC__SOLR_URL']
+        self.DISPLAY_STATUSES_BACKUP_DIR = os.environ['IIP_PRC__DISPLAY_STATUSES_BACKUP_DIR']
+        self.STATUSES_GIST_URL = os.environ['IIP_PRC__STATUSES_GIST_URL']
+        self.STATUSES_GIST_USERNAME = os.environ['IIP_PRC__STATUSES_GIST_USERNAME']
+        self.STATUSES_GIST_PASSWORD = os.environ['IIP_PRC__STATUSES_GIST_PASSWORD']
         self.DISPLAY_STATUSES_BACKUP_TIMEFRAME_IN_DAYS = int( os.environ['IIP_PRC__DISPLAY_STATUSES_BACKUP_TIMEFRAME_IN_DAYS'] )
 
     def make_backup( self ):
@@ -133,7 +131,7 @@ class StatusBackupper( object ):
         log.debug( 'starting gist update' )
         auth = requests.auth.HTTPBasicAuth( self.STATUSES_GIST_USERNAME, self.STATUSES_GIST_PASSWORD )
         json_payload = json.dumps( {
-            'description': '{} -- iip display statuses'.format(unicode(datetime.datetime.now())),
+            'description': '{} -- iip display statuses'.format(str(datetime.datetime.now())),
             'files': {
                 'iip_display_statuses.json': { 'content': status_json },
             }
@@ -162,7 +160,7 @@ class StatusBackupper( object ):
         seconds_in_day = 60 * 60 * 24
         timeframe_days = seconds_in_day * self.DISPLAY_STATUSES_BACKUP_TIMEFRAME_IN_DAYS
         backup_files = os.listdir( self.DISPLAY_STATUSES_BACKUP_DIR )
-        backup_files = [ unicode(x) for x in backup_files ]
+        backup_files = [ x for x in backup_files ]
         for backup_filename in backup_files:
             backup_filepath = '{dir}/{fname}'.format( dir=self.DISPLAY_STATUSES_BACKUP_DIR, fname=backup_filename )
             if os.stat( backup_filepath ).st_mtime < (now - timeframe_days):
@@ -176,10 +174,10 @@ class Prepper( object ):
     """ Manages prep for solr post. """
 
     def __init__( self ):
-        self.XML_DIR = unicode( os.environ['IIP_PRC__CLONED_INSCRIPTIONS_PATH'] )
-        self.STYLESHEET_PATH = unicode( os.environ['IIP_PRC__SOLR_DOC_STYLESHEET_PATH'] )
-        self.TRANSFORMER_URL = unicode( os.environ['IIP_PRC__TRANSFORMER_URL'] )
-        self.TRANSFORMER_AUTH_KEY = unicode( os.environ['IIP_PRC__TRANSFORMER_AUTH_KEY'] )
+        self.XML_DIR = os.environ['IIP_PRC__CLONED_INSCRIPTIONS_PATH']
+        self.STYLESHEET_PATH = os.environ['IIP_PRC__SOLR_DOC_STYLESHEET_PATH']
+        self.TRANSFORMER_URL = os.environ['IIP_PRC__TRANSFORMER_URL']
+        self.TRANSFORMER_AUTH_KEY = os.environ['IIP_PRC__TRANSFORMER_AUTH_KEY']
 
     def make_solr_data( self, file_id, status_json ):
         """ Manages preparation of solr data.
@@ -252,7 +250,7 @@ class Indexer( object ):
     """ Manages solr calls. """
 
     def __init__( self ):
-        self.SOLR_URL = unicode( os.environ['IIP_PRC__SOLR_URL'] )
+        self.SOLR_URL = os.environ['IIP_PRC__SOLR_URL']
 
     def update_entry( self, inscription_id, solr_xml ):
         """ Posts xml to solr.

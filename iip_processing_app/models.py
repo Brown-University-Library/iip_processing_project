@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-
 import json, logging
 from django.core import serializers
 from django.db import models
@@ -17,7 +15,7 @@ class Status( models.Model ):
     status_summary = models.CharField( blank=True, max_length=20 )
     status_detail = models.TextField( blank=True )
 
-    def __unicode__(self):
+    def __str__(self):
         return self.inscription_id
 
     def jsonify(self):

@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-
 import json, logging, os, pprint
 from django.conf import settings
 from django.contrib.auth import authenticate
@@ -17,8 +15,8 @@ class UserGrabber(object):
         Helper for views.view_processing() """
 
     def __init__( self ):
-        self.LEGIT_VIEWER_USER = unicode( os.environ['IIP_PRC__LEGIT_QUEUE_VIEWER_USER'] )
-        self.LEGIT_VIEWER_PASSWORD = unicode( os.environ['IIP_PRC__LEGIT_QUEUE_VIEWER_PASSWORD'] )
+        self.LEGIT_VIEWER_USER = os.environ['IIP_PRC__LEGIT_QUEUE_VIEWER_USER']
+        self.LEGIT_VIEWER_PASSWORD = os.environ['IIP_PRC__LEGIT_QUEUE_VIEWER_PASSWORD']
 
     def get_user( self, meta_dct ):
         """ Returns user object.

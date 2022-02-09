@@ -2,8 +2,6 @@
 
 # flake8: noqa  // prevents flake8 from generating an alert
 
-from __future__ import unicode_literals
-
 import os, sys
 
 """

@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-
 import datetime, json, logging, pprint
 
 from django.conf import settings
@@ -56,7 +54,7 @@ def update_processing_status( request ):
         Called by workers. """
     log.debug( 'request.__dict__, ```{}```'.format(pprint.pformat(request.__dict__)) )
     resp = HttpResponseForbidden( '403 / Forbidden' )
-    if unicode( request.META.get('HTTP_HOST', '') ) in settings.ALLOWED_HOSTS:
+    if request.META.get('HTTP_HOST', '') in settings.ALLOWED_HOSTS:
         ( to_process_dct, single_update_dct ) = process_status_recorder.check_for_data( request.body )
         if to_process_dct:
             resp = process_status_recorder.handle_enqueues( to_process_dct )

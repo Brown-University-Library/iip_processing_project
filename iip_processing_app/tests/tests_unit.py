@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-
 """ Contains travis-ci.org friendly tests. """
 
 import base64, json, logging, os
@@ -59,7 +57,7 @@ class GHValidatorTest(TestCase):
         """ Checks parsing of github's X-Hub-Signature header.
             Note: hmac requires a byte-string secret. """
         dummy_secret = 'foo_secret'
-        dummy_payload = unicode( json.dumps({ 'foo': 'bar' }) )
+        dummy_payload = json.dumps({ 'foo': 'bar' })
         dummy_signature = 'sha1=6ef7bc87b6a827c49de558766f2229f8d3e5e81c'
         log.debug( 'type(dummy_signature), ```{}```'.format(type(dummy_signature)) )
         self.assertEqual(
@@ -160,7 +158,7 @@ class PrepperUnitTest(TestCase):
     """ Checks travis-friendly processor.py functions. """
 
     def setUp(self):
-        self.xml_dir = unicode( os.environ['IIP_PRC__CLONED_INSCRIPTIONS_PATH'] )
+        self.xml_dir = os.environ['IIP_PRC__CLONED_INSCRIPTIONS_PATH']
 
     def test_update_status(self):
         """ Checks addition of display_status. """

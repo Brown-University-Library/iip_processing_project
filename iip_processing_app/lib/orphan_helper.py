@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-
 import datetime, glob, json, logging, os, pprint
 import requests
 from iip_processing_app.lib.processor import Indexer
@@ -18,8 +16,8 @@ class OrphanDeleter( object ):
     def __init__( self ):
         """ Settings. """
         self.ADMINS = json.loads( os.environ['IIP_PRC__LEGIT_ADMINS_JSON'] )
-        self.GIT_CLONED_DIR_PATH = unicode( os.environ['IIP_PRC__CLONED_INSCRIPTIONS_PATH'] )
-        self.SOLR_URL = unicode( os.environ['IIP_PRC__SOLR_URL'] )
+        self.GIT_CLONED_DIR_PATH = os.environ['IIP_PRC__CLONED_INSCRIPTIONS_PATH']
+        self.SOLR_URL = os.environ['IIP_PRC__SOLR_URL']
 
     def validate_delete_request( self, eppn, dev_user, host ):
         """ Validates admin request.

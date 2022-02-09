@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
 import base64, datetime, hashlib, hmac, json, logging, os, pprint
 import requests
 from django.http import HttpResponse
@@ -15,11 +14,11 @@ class GHValidator( object ):
         Helper for views.gh_inscription_watcher() """
 
     def __init__( self ):
-        self.AUTH_USERNAME = unicode( os.environ['IIP_PRC__BASIC_AUTH_USERNAME'] )
-        self.AUTH_PASSWORD = unicode( os.environ['IIP_PRC__BASIC_AUTH_PASSWORD'] )
-        self.DEV_URL = unicode( os.environ['IIP_PRC__DEV_URL'] )
-        self.PRODUCTION_HOSTNAME = unicode( os.environ['IIP_PRC__PRODUCTION_HOSTNAME'] )
-        self.SECRET = unicode(os.environ['IIP_PRC__REPO_SECRET_KEY'] )
+        self.AUTH_USERNAME = os.environ['IIP_PRC__BASIC_AUTH_USERNAME']
+        self.AUTH_PASSWORD = os.environ['IIP_PRC__BASIC_AUTH_PASSWORD']
+        self.DEV_URL = os.environ['IIP_PRC__DEV_URL']
+        self.PRODUCTION_HOSTNAME = os.environ['IIP_PRC__PRODUCTION_HOSTNAME']
+        self.SECRET = os.environ['IIP_PRC__REPO_SECRET_KEY']
 
     def validate_submission( self, submitted_basic_auth_info, submitted_signature, submitted_payload ):
         """ Manages validation.
@@ -68,7 +67,7 @@ class GHValidator( object ):
             Note, secret must be utf8; payload can be unicode. """
         secret_utf8 = secret.encode( 'utf-8' )
         hmac_digest_utf8 = hmac.new( secret_utf8, payload, hashlib.sha1 ).hexdigest()
-        signature = 'sha1={}'.format( unicode(hmac_digest_utf8) )
+        signature = 'sha1={}'.format( hmac_digest_utf8.decode('utf-8') )
         log.debug( 'calculated signature, ```{}```'.format(signature) )
         return signature
 
@@ -82,10 +81,10 @@ class GHHelper( object ):
     def __init__( self ):
         """ Grabs env-vars.
             Note: auth-username and auth-password no longer used for validation here, but still needed for dev pass-through. """
-        self.AUTH_USERNAME = unicode( os.environ['IIP_PRC__BASIC_AUTH_USERNAME'] )
-        self.AUTH_PASSWORD = unicode( os.environ['IIP_PRC__BASIC_AUTH_PASSWORD'] )
-        self.DEV_URL = unicode( os.environ['IIP_PRC__DEV_URL'] )
-        self.PRODUCTION_HOSTNAME = unicode( os.environ['IIP_PRC__PRODUCTION_HOSTNAME'] )
+        self.AUTH_USERNAME = os.environ['IIP_PRC__BASIC_AUTH_USERNAME']
+        self.AUTH_PASSWORD = os.environ['IIP_PRC__BASIC_AUTH_PASSWORD']
+        self.DEV_URL = os.environ['IIP_PRC__DEV_URL']
+        self.PRODUCTION_HOSTNAME = os.environ['IIP_PRC__PRODUCTION_HOSTNAME']
 
     def handle_inscription_update( self, request_body, host, submitted_signature ):
         """ Enqueues first of a series of processing jobs.
@@ -100,7 +99,7 @@ class GHHelper( object ):
     def prep_files_to_process( self, commits_lst ):
         """ Prepares the data-dict to be sent to the first rq job.
             Called by handle_inscription_update() """
-        files_to_process = { 'files_updated': [], 'files_removed': [], 'timestamp': unicode(datetime.datetime.now()) }
+        files_to_process = { 'files_updated': [], 'files_removed': [], 'timestamp': str(datetime.datetime.now()) }
         ( added, modified, removed ) = self.examine_commits( commits_lst )
         files_to_process['files_updated'] = added
         files_to_process['files_updated'].extend( modified )  # solrization same for added or modified
@@ -145,7 +144,7 @@ class GHHelper( object ):
                 r = requests.post( self.DEV_URL, data=request_body, auth=(self.AUTH_USERNAME, self.AUTH_PASSWORD), headers=headers, timeout=10 )
                 log.debug( 'status_code, `{}`'.format(r.status_code) )
             except Exception as e:
-                log.error( 'exception, ```{}```'.format(unicode(repr(e))) )
+                log.error( 'exception, ```{}```'.format( repr(e)) )
         log.debug( 'leaving' )
         return
 
