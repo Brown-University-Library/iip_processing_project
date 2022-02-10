@@ -62,12 +62,25 @@ class GHValidator( object ):
         resp['WWW-Authenticate'] = 'Basic realm="iip_processor"'
         return resp
 
+    # def determine_signature( self, secret, payload ):
+    #     """ Returns signature of payload.
+    #         Note, secret must be utf8; payload can be unicode. """
+    #     secret_utf8 = secret.encode( 'utf-8' )
+    #     hmac_digest_utf8 = hmac.new( secret_utf8, payload, hashlib.sha1 ).hexdigest()
+    #     signature = 'sha1={}'.format( hmac_digest_utf8.decode('utf-8') )
+    #     log.debug( 'calculated signature, ```{}```'.format(signature) )
+    #     return signature
+
     def determine_signature( self, secret, payload ):
         """ Returns signature of payload.
             Note, secret must be utf8; payload can be unicode. """
+        assert type(secret) == str, type(secret)
+        assert type(payload) == str, type(payload)
         secret_utf8 = secret.encode( 'utf-8' )
-        hmac_digest_utf8 = hmac.new( secret_utf8, payload, hashlib.sha1 ).hexdigest()
-        signature = 'sha1={}'.format( hmac_digest_utf8.decode('utf-8') )
+        payload_utf8 = payload.encode( 'utf-8' )
+        hmac_digest = hmac.new( secret_utf8, payload_utf8, hashlib.sha1 ).hexdigest()
+        assert type(hmac_digest) == str, type(hmac_digest)
+        signature = 'sha1={}'.format( hmac_digest )
         log.debug( 'calculated signature, ```{}```'.format(signature) )
         return signature
 
