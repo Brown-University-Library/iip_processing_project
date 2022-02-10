@@ -32,15 +32,34 @@ class GHValidator( object ):
         log.debug( 'validity, `{}`'.format(validity) )
         return validity
 
+    # def parse_http_basic_auth( self, basic_auth_header_text ):
+    #     """ Returns parsed username and password.
+    #         Called by views.gh_inscription_watcher() """
+    #     log.debug( 'starting parse_http_basic_auth()' )
+    #     userpass_dct = { 'username': None, 'password': None }
+    #     auth = basic_auth_header_text.split()
+    #     if len(auth) == 2:
+    #         if auth[0].lower() == 'basic':
+    #             ( received_username, received_password ) = base64.b64decode( auth[1] ).split( ':' )
+    #             userpass_dct = { 'received_username': received_username, 'received_password': received_password }
+    #     return userpass_dct
+
     def parse_http_basic_auth( self, basic_auth_header_text ):
         """ Returns parsed username and password.
             Called by views.gh_inscription_watcher() """
         log.debug( 'starting parse_http_basic_auth()' )
+        assert type(basic_auth_header_text) == str, type(basic_auth_header_text)
         userpass_dct = { 'username': None, 'password': None }
         auth = basic_auth_header_text.split()
+        assert type(auth) == list, type(auth)
+        log.debug( f'auth, ``{auth}``')
+
         if len(auth) == 2:
             if auth[0].lower() == 'basic':
-                ( received_username, received_password ) = base64.b64decode( auth[1] ).split( ':' )
+                userpass_utf8 = base64.b64decode( auth[1] )
+                assert type(userpass_utf8) == bytes, type(userpass_utf8)
+                userpass = userpass_utf8.decode( 'utf-8' )
+                ( received_username, received_password ) = userpass.split( ':' )
                 userpass_dct = { 'received_username': received_username, 'received_password': received_password }
         return userpass_dct
 

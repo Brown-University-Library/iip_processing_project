@@ -45,13 +45,32 @@ class GHValidatorTest(TestCase):
 
     def test_parse_http_basic_auth(self):
         """ Checks parsing of username and password. """
-        encoded_string = base64.encodestring( '{usrnm}:{psswd}'.format(usrnm='username_foo', psswd='password_bar') ).replace( '\n', '' )
-        basic_auth_string = 'Basic {}'.format( encoded_string )
-        log.debug( 'basic_auth_string, ```{}```'.format(basic_auth_string) )
+        userpass_utf8 = '{usrnm}:{psswd}'.format( usrnm='username_foo', psswd='password_bar' ).encode( 'utf-8' )
+        log.debug( f'userpass_utf8, ``{userpass_utf8}``' )
+
+        b64_utf8_a = base64.encodebytes( userpass_utf8 )
+        assert type(b64_utf8_a) == bytes, type(b64_utf8_a)
+
+        b64_a = b64_utf8_a.decode( 'utf-8' )
+        b64_b = b64_a.replace( '\n', '' )
+        log.debug( f'b64_b, ``{b64_b}``' )
+
+        basic_auth_string = f'Basic {b64_b}'
+        log.debug( f'basic_auth_string, ``{basic_auth_string}``' )
         self.assertEqual(
             { 'received_username': 'username_foo', 'received_password': 'password_bar' },
             gh_validator.parse_http_basic_auth( basic_auth_string )
         )
+
+    # def test_parse_http_basic_auth(self):
+    #     """ Checks parsing of username and password. """
+    #     encoded_string = base64.encodestring( '{usrnm}:{psswd}'.format(usrnm='username_foo', psswd='password_bar') ).replace( '\n', '' )
+    #     basic_auth_string = 'Basic {}'.format( encoded_string )
+    #     log.debug( 'basic_auth_string, ```{}```'.format(basic_auth_string) )
+    #     self.assertEqual(
+    #         { 'received_username': 'username_foo', 'received_password': 'password_bar' },
+    #         gh_validator.parse_http_basic_auth( basic_auth_string )
+    #     )
 
     def test_parse_signature(self):
         """ Checks parsing of github's X-Hub-Signature header.
