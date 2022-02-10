@@ -4,6 +4,6 @@ lxml
 PyMySQL
 redis
 requests
-rq
+rq~=0.13.0
 git+https://github.com/birkin/shellvars-py.git@v0.2
 solrpy
