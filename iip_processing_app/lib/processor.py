@@ -210,24 +210,45 @@ class Prepper( object ):
         log.debug( 'source_xml, ```{}```'.format(xml) )
         return xml
 
+    # def make_initial_solr_doc( self, source_xml ):
+    #     """ Returns result of xsl transform.
+    #         Called by make_solr_data() """
+    #     log.debug( 'stylesheet_path, ```{}```'.format(self.STYLESHEET_PATH) )
+    #     log.debug( 'transformer url, ```{}```'.format(self.TRANSFORMER_URL) )
+    #     try:
+    #         with open( self.STYLESHEET_PATH ) as f:
+    #             stylesheet_utf8 = f.read()
+    #         stylesheet = stylesheet_utf8.decode( 'utf-8' )
+    #         payload = {
+    #             'xml': source_xml, 'xsl': stylesheet, 'auth_key': self.TRANSFORMER_AUTH_KEY }
+    #         r = requests.post( self.TRANSFORMER_URL, data=payload )
+    #         transformed_xml = r.content.decode( 'utf-8' )
+    #     except Exception as e:
+    #         message = 'exception making initial_solr_doc, ```%s```' % e
+    #         log.error( message )
+    #         raise Exception( message )
+    #     log.debug( 'transformed_xml, ```{}```'.format(transformed_xml) )
+    #     return transformed_xml
+
     def make_initial_solr_doc( self, source_xml ):
         """ Returns result of xsl transform.
             Called by make_solr_data() """
-        log.debug( 'stylesheet_path, ```{}```'.format(self.STYLESHEET_PATH) )
-        log.debug( 'transformer url, ```{}```'.format(self.TRANSFORMER_URL) )
+        assert type(source_xml) == str, type(source_xml)
+        log.debug( f'stylesheet_path, ``{self.STYLESHEET_PATH}``' )
+        log.debug( f'transformer url, ``{self.TRANSFORMER_URL}``' )
         try:
+            stylesheet = ''
             with open( self.STYLESHEET_PATH ) as f:
-                stylesheet_utf8 = f.read()
-            stylesheet = stylesheet_utf8.decode( 'utf-8' )
+                stylesheet = f.read()
             payload = {
                 'xml': source_xml, 'xsl': stylesheet, 'auth_key': self.TRANSFORMER_AUTH_KEY }
             r = requests.post( self.TRANSFORMER_URL, data=payload )
             transformed_xml = r.content.decode( 'utf-8' )
         except Exception as e:
-            message = 'exception making initial_solr_doc, ```%s```' % e
-            log.error( message )
+            message = 'exception making initial_solr_doc, ``%s``' % repr(e)
+            log.exception( message )
             raise Exception( message )
-        log.debug( 'transformed_xml, ```{}```'.format(transformed_xml) )
+        log.debug( f'transformed_xml, ``{transformed_xml}``' )
         return transformed_xml
 
     def update_status( self, display_status, initial_solr_xml ):

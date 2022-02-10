@@ -53,7 +53,6 @@ class GHValidator( object ):
         auth = basic_auth_header_text.split()
         assert type(auth) == list, type(auth)
         log.debug( f'auth, ``{auth}``')
-
         if len(auth) == 2:
             if auth[0].lower() == 'basic':
                 userpass_utf8 = base64.b64decode( auth[1] )
