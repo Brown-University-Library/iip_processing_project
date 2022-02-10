@@ -1,4 +1,6 @@
-# -*- coding: utf-8 -*-
+"""
+Usage: % python3 ./iip_processing_app/lib/queue_utils/output_failed_queue.py
+"""
 
 import os, pprint
 import redis, rq
