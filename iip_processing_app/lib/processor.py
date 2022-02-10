@@ -30,17 +30,34 @@ class Puller( object ):
         """ Settings. """
         self.GIT_CLONED_DIR_PATH = os.environ['IIP_PRC__CLONED_INSCRIPTIONS_PATH']
 
+    # def call_git_pull( self ):
+    #     """ Runs git_pull.
+    #             Returns list of filenames.
+    #         Called by run_call_git_pull(). """
+    #     log.debug( 'starting call_git_pull()' )
+    #     original_directory = os.getcwd()
+    #     log.debug( 'original_directory, ```{}```'.format(original_directory) )
+    #     os.chdir( self.GIT_CLONED_DIR_PATH )
+    #     log.debug( 'temp directory, ```{}```'.format(os.getcwd()) )
+    #     command = 'git pull'
+    #     r = envoy.run( command.encode('utf-8') )  # envoy requires strings
+    #     track_dct = self.track_envoy_call( r )
+    #     os.chdir( original_directory )
+    #     log.debug( 'directory after change-back, ```{}```'.format(os.getcwd()) )
+    #     return track_dct['status_code']
+
     def call_git_pull( self ):
         """ Runs git_pull.
                 Returns list of filenames.
             Called by run_call_git_pull(). """
         log.debug( 'starting call_git_pull()' )
         original_directory = os.getcwd()
-        log.debug( 'original_directory, ```{}```'.format(original_directory) )
+        log.debug( f'original_directory, ``{original_directory}``' )
         os.chdir( self.GIT_CLONED_DIR_PATH )
-        log.debug( 'temp directory, ```{}```'.format(os.getcwd()) )
+        log.debug( f'temp directory, ``{os.getcwd()}``' )
         command = 'git pull'
-        r = envoy.run( command.encode('utf-8') )  # envoy requires strings
+        # r = envoy.run( command.encode('utf-8') )  # envoy requires bytes
+        r = envoy.run( command )
         track_dct = self.track_envoy_call( r )
         os.chdir( original_directory )
         log.debug( 'directory after change-back, ```{}```'.format(os.getcwd()) )
@@ -51,10 +68,10 @@ class Puller( object ):
             Called by call_git_pull() """
         track_dct = {
             'status_code': envoy_response.status_code,  # int
-            'std_out': envoy_response.std_out.decode(u'utf-8'),
-            'std_err': envoy_response.std_err.decode(u'utf-8'),
-            'command': envoy_response.command,  # list
-            'history': envoy_response.history  # list
+            'std_out': envoy_response.std_out,
+            'std_err': envoy_response.std_err,
+            'command': envoy_response.command,          # list
+            'history': envoy_response.history           # list
         }
         log.debug( 'envoy response, ```{}```'.format(pprint.pformat(track_dct)) )
         return track_dct
