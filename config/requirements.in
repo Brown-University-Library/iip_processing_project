@@ -5,5 +5,5 @@ PyMySQL
 redis
 requests
 rq
-shellvars-py
+git+https://github.com/birkin/shellvars-py.git@v0.2
 solrpy
