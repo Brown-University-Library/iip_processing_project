@@ -40,7 +40,7 @@ requests==2.27.1
     # via -r ./config/requirements.in
 rq==1.10.1
     # via -r ./config/requirements.in
-shellvars-py==0.1.2
+shellvars-py @ git+https://github.com/birkin/shellvars-py.git@v0.2
     # via -r ./config/requirements.in
 six==1.16.0
     # via solrpy
