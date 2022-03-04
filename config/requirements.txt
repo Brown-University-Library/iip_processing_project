@@ -8,8 +8,10 @@ certifi==2021.10.8
     # via requests
 charset-normalizer==2.0.11
     # via requests
-click==8.0.3
-    # via rq
+click==7.1.2
+    # via
+    #   -r ./config/requirements.in
+    #   rq
 deprecated==1.2.13
     # via redis
 django==1.11.29

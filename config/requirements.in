@@ -1,9 +1,10 @@
+click~=7.1.0  # backed off from the `8.0.3` auto-installed by rq due to worker-start issue.
 Django~=1.11.0
 envoy
+git+https://github.com/birkin/shellvars-py.git@v0.2
 lxml
 PyMySQL
 redis
 requests
 rq~=0.13.0
-git+https://github.com/birkin/shellvars-py.git@v0.2
 solrpy
