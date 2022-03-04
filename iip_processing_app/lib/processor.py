@@ -221,32 +221,23 @@ class Prepper( object ):
     def grab_inscription( self, file_id ):
         """ Returns inscription xml.
             Called by make_solr_data() """
+        assert type(file_id) == str, type(file_id)
         filepath = '{dir}/epidoc-files/{file_id}.xml'.format( dir=self.XML_DIR, file_id=file_id )
         with open( filepath ) as f:
-            xml_utf8 = f.read()
-        xml = xml_utf8.decode( 'utf-8' )
+            xml = f.read()
+            assert type(xml) == str; type(xml)
         log.debug( 'source_xml, ```{}```'.format(xml) )
         return xml
 
-    # def make_initial_solr_doc( self, source_xml ):
-    #     """ Returns result of xsl transform.
+    # def grab_inscription( self, file_id ):
+    #     """ Returns inscription xml.
     #         Called by make_solr_data() """
-    #     log.debug( 'stylesheet_path, ```{}```'.format(self.STYLESHEET_PATH) )
-    #     log.debug( 'transformer url, ```{}```'.format(self.TRANSFORMER_URL) )
-    #     try:
-    #         with open( self.STYLESHEET_PATH ) as f:
-    #             stylesheet_utf8 = f.read()
-    #         stylesheet = stylesheet_utf8.decode( 'utf-8' )
-    #         payload = {
-    #             'xml': source_xml, 'xsl': stylesheet, 'auth_key': self.TRANSFORMER_AUTH_KEY }
-    #         r = requests.post( self.TRANSFORMER_URL, data=payload )
-    #         transformed_xml = r.content.decode( 'utf-8' )
-    #     except Exception as e:
-    #         message = 'exception making initial_solr_doc, ```%s```' % e
-    #         log.error( message )
-    #         raise Exception( message )
-    #     log.debug( 'transformed_xml, ```{}```'.format(transformed_xml) )
-    #     return transformed_xml
+    #     filepath = '{dir}/epidoc-files/{file_id}.xml'.format( dir=self.XML_DIR, file_id=file_id )
+    #     with open( filepath ) as f:
+    #         xml_utf8 = f.read()
+    #     xml = xml_utf8.decode( 'utf-8' )
+    #     log.debug( 'source_xml, ```{}```'.format(xml) )
+    #     return xml
 
     def make_initial_solr_doc( self, source_xml ):
         """ Returns result of xsl transform.
@@ -258,6 +249,7 @@ class Prepper( object ):
             stylesheet = ''
             with open( self.STYLESHEET_PATH ) as f:
                 stylesheet = f.read()
+                assert type(stylesheet) == str, type(stylesheet)
             payload = {
                 'xml': source_xml, 'xsl': stylesheet, 'auth_key': self.TRANSFORMER_AUTH_KEY }
             r = requests.post( self.TRANSFORMER_URL, data=payload )
@@ -268,6 +260,27 @@ class Prepper( object ):
             raise Exception( message )
         log.debug( f'transformed_xml, ``{transformed_xml}``' )
         return transformed_xml
+
+    # def make_initial_solr_doc( self, source_xml ):
+    #     """ Returns result of xsl transform.
+    #         Called by make_solr_data() """
+    #     assert type(source_xml) == str, type(source_xml)
+    #     log.debug( f'stylesheet_path, ``{self.STYLESHEET_PATH}``' )
+    #     log.debug( f'transformer url, ``{self.TRANSFORMER_URL}``' )
+    #     try:
+    #         stylesheet = ''
+    #         with open( self.STYLESHEET_PATH ) as f:
+    #             stylesheet = f.read()
+    #         payload = {
+    #             'xml': source_xml, 'xsl': stylesheet, 'auth_key': self.TRANSFORMER_AUTH_KEY }
+    #         r = requests.post( self.TRANSFORMER_URL, data=payload )
+    #         transformed_xml = r.content.decode( 'utf-8' )
+    #     except Exception as e:
+    #         message = 'exception making initial_solr_doc, ``%s``' % repr(e)
+    #         log.exception( message )
+    #         raise Exception( message )
+    #     log.debug( f'transformed_xml, ``{transformed_xml}``' )
+    #     return transformed_xml
 
     def update_status( self, display_status, initial_solr_xml ):
         """ Updates initial solr-xml with display-status.
@@ -281,6 +294,19 @@ class Prepper( object ):
         statused_xml = utf8_xml.decode( 'utf-8' )
         log.debug( 'statused_xml, ```{}```'.format(statused_xml) )
         return statused_xml
+
+    # def update_status( self, display_status, initial_solr_xml ):
+    #     """ Updates initial solr-xml with display-status.
+    #         Called by make_solr_data() """
+    #     doc = etree.fromstring( initial_solr_xml.encode('utf-8') )  # can't take unicode string due to xml file's encoding declaration
+    #     node = doc.xpath( '//doc' )[0]
+    #     new_field = etree.SubElement( node, 'field' )
+    #     new_field.attrib['name'] = 'display_status'
+    #     new_field.text = display_status
+    #     utf8_xml = etree.tostring( doc, encoding='UTF-8', xml_declaration=True, pretty_print=False )
+    #     statused_xml = utf8_xml.decode( 'utf-8' )
+    #     log.debug( 'statused_xml, ```{}```'.format(statused_xml) )
+    #     return statused_xml
 
     ## end class Prepper()
 
