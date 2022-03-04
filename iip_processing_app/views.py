@@ -38,7 +38,8 @@ def gh_inscription_watcher( request ):
     log.debug( 'request.__dict__, ```{}```'.format(pprint.pformat(request.__dict__)) )
     resp = HttpResponseForbidden( '403 / Forbidden' )  # will be returned if incorrect basic-auth credentials are submitted, or if signature check fails.
     if 'HTTP_AUTHORIZATION' in request.META:
-        ( submitted_basic_auth_info, submitted_signature, submitted_payload ) = ( request.META['HTTP_AUTHORIZATION'].decode('utf-8'), request.META['HTTP_X_HUB_SIGNATURE'].decode('utf-8'), request.body.decode('utf-8') )
+        # ( submitted_basic_auth_info, submitted_signature, submitted_payload ) = ( request.META['HTTP_AUTHORIZATION'].decode('utf-8'), request.META['HTTP_X_HUB_SIGNATURE'].decode('utf-8'), request.body.decode('utf-8') )
+        ( submitted_basic_auth_info, submitted_signature, submitted_payload ) = ( request.META['HTTP_AUTHORIZATION'], request.META['HTTP_X_HUB_SIGNATURE'], request.body )
         if github_validator.validate_submission( submitted_basic_auth_info, submitted_signature, submitted_payload ):
             github_helper.handle_inscription_update( request.body, request.META.get('HTTP_HOST', None), submitted_signature )
             resp = HttpResponse( '200 / OK' )
