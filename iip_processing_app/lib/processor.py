@@ -162,7 +162,8 @@ class StatusBackupper( object ):
             Called by make_backup().
             TODO: eventually commit status_json to a repo, and push to github, streamlining local and external backup. """
         log.debug( 'starting local save' )
-        filename = 'display_statuses_backup_{}.json'.format( unicode(datetime.datetime.now()) ).replace( ' ', '_' )
+        # filename = 'display_statuses_backup_{}.json'.format( unicode(datetime.datetime.now()) ).replace( ' ', '_' )
+        filename = 'display_statuses_backup_{}.json'.format( str(datetime.datetime.now()) ).replace( ' ', '_' )
         filepath = '{dir}/{fname}'.format( dir=self.DISPLAY_STATUSES_BACKUP_DIR, fname=filename )
         log.debug( 'filepath, ```{}```'.format(filepath) )
         with open( filepath, 'w' ) as f:
