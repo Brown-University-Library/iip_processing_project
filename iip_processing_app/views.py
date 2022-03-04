@@ -41,7 +41,8 @@ def gh_inscription_watcher( request ):
         # ( submitted_basic_auth_info, submitted_signature, submitted_payload ) = ( request.META['HTTP_AUTHORIZATION'].decode('utf-8'), request.META['HTTP_X_HUB_SIGNATURE'].decode('utf-8'), request.body.decode('utf-8') )
         submitted_basic_auth_info = request.META['HTTP_AUTHORIZATION']; assert type(submitted_basic_auth_info) == str, type(submitted_basic_auth_info)
         submitted_signature = request.META['HTTP_X_HUB_SIGNATURE']; assert type(submitted_signature) == str, type(submitted_signature)
-        submitted_payload = request.body; assert type(submitted_payload) == str, type(submitted_payload)
+        submitted_utf8_payload = request.body; assert type(submitted_payload) == bytes, type(submitted_payload)
+        submitted_payload = submitted_utf8_payload.decode('utf-8')
         if github_validator.validate_submission( submitted_basic_auth_info, submitted_signature, submitted_payload ):
             github_helper.handle_inscription_update( request.body, request.META.get('HTTP_HOST', None), submitted_signature )
             resp = HttpResponse( '200 / OK' )
