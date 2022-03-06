@@ -285,6 +285,8 @@ class Prepper( object ):
     def update_status( self, display_status, initial_solr_xml ):
         """ Updates initial solr-xml with display-status.
             Called by make_solr_data() """
+        assert type(display_status) == str, type(display_status)
+        assert type(initial_solr_xml) == str, type(initial_solr_xml)
         doc = etree.fromstring( initial_solr_xml.encode('utf-8') )  # can't take unicode string due to xml file's encoding declaration
         node = doc.xpath( '//doc' )[0]
         new_field = etree.SubElement( node, 'field' )
