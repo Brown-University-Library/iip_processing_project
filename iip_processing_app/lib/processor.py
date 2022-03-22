@@ -17,10 +17,15 @@ from lxml import etree
 
 
 log = logging.getLogger(__name__)
-if not logging._handlers:  # true when module accessed by queue-jobs
-    worker_config_dct = json.loads( os.environ['IIP_PRC__JOB_LOG_CONFIG_JSON'] )
-    worker_config_dct['loggers']['iip_processing_app']['level'] = os.environ[u'IIP_PRC__LOG_LEVEL']
-    logging.config.dictConfig( worker_config_dct )
+
+# if not logging.handlers:  # true when module accessed by queue-jobs
+#     worker_config_dct = json.loads( os.environ['IIP_PRC__JOB_LOG_CONFIG_JSON'] )
+#     worker_config_dct['loggers']['iip_processing_app']['level'] = os.environ[u'IIP_PRC__LOG_LEVEL']
+#     logging.config.dictConfig( worker_config_dct )
+
+worker_config_dct = json.loads( os.environ['IIP_PRC__JOB_LOG_CONFIG_JSON'] )
+worker_config_dct['loggers']['iip_processing_app']['level'] = os.environ[u'IIP_PRC__LOG_LEVEL']
+logging.config.dictConfig( worker_config_dct )
 
 
 class Puller( object ):
@@ -146,7 +151,7 @@ class StatusBackupper( object ):
         """ Saves statuses to gist.
             Called by make_backup(). """
         log.debug( 'starting gist update' )
-        auth = requests.auth.HTTPBasicAuth( self.STATUSES_GIST_USERNAME, self.STATUSES_GIST_PASSWORD )
+        auth = requests.auth.HTTPBasicAuth( self.STATUSES_GIST_USERNAME, self.STATUSES_GIST_PASSWORD )  # type: ignore
         json_payload = json.dumps( {
             'description': '{} -- iip display statuses'.format(str(datetime.datetime.now())),
             'files': {
@@ -287,12 +292,13 @@ class Prepper( object ):
             Called by make_solr_data() """
         assert type(display_status) == str, type(display_status)
         assert type(initial_solr_xml) == str, type(initial_solr_xml)
-        doc = etree.fromstring( initial_solr_xml.encode('utf-8') )  # can't take unicode string due to xml file's encoding declaration
+        doc = etree.fromstring( initial_solr_xml.encode('utf-8'), parser=None )  # can't take unicode string due to xml file's encoding declaration
         node = doc.xpath( '//doc' )[0]
-        new_field = etree.SubElement( node, 'field' )
+        # new_field = etree.SubElement( node, 'field' )
+        new_field = etree.SubElement( node, 'field', attrib={} )  # type: ignore
         new_field.attrib['name'] = 'display_status'
         new_field.text = display_status
-        utf8_xml = etree.tostring( doc, encoding='UTF-8', xml_declaration=True, pretty_print=False )
+        utf8_xml = etree.tostring( doc, encoding='UTF-8', xml_declaration=True, pretty_print=False )  # type: ignore
         statused_xml = utf8_xml.decode( 'utf-8' )
         log.debug( 'statused_xml, ```{}```'.format(statused_xml) )
         return statused_xml
@@ -319,6 +325,20 @@ class Indexer( object ):
     def __init__( self ):
         self.SOLR_URL = os.environ['IIP_PRC__SOLR_URL']
 
+    # def update_entry( self, inscription_id, solr_xml ):
+    #     """ Posts xml to solr.
+    #         Called by run_update_index_file() """
+    #     update_url = '{}/update/?commit=true'.format( self.SOLR_URL )
+    #     log.debug( 'solr update url, ```{}```'.format(update_url) )
+    #     headers = { 'content-type'.encode('utf-8'): 'text/xml; charset=utf-8'.encode('utf-8') }  # from testing, NON-unicode-string posts were bullet-proof
+    #     r = requests.post(
+    #         update_url.encode(u'utf-8'), headers=headers, data=solr_xml.encode('utf-8') )
+    #     result_dct = {
+    #         'response_status_code': r.status_code, 'response_text': r.content.decode('utf-8') }
+    #     log.debug( 'solr response result_dct, ```{}```'.format(pprint.pformat(result_dct)) )
+    #     process_status_updater.update_single_status( inscription_id=inscription_id, status='update-processed', status_detail=result_dct )
+    #     return
+
     def update_entry( self, inscription_id, solr_xml ):
         """ Posts xml to solr.
             Called by run_update_index_file() """
@@ -330,7 +350,8 @@ class Indexer( object ):
         result_dct = {
             'response_status_code': r.status_code, 'response_text': r.content.decode('utf-8') }
         log.debug( 'solr response result_dct, ```{}```'.format(pprint.pformat(result_dct)) )
-        process_status_updater.update_single_status( inscription_id=inscription_id, status='update-processed', status_detail=result_dct )
+        status_str: str = repr( result_dct )
+        process_status_updater.update_single_status( inscription_id=inscription_id, status='update-processed', status_detail=status_str )
         return
 
     def delete_entry( self, file_id ):
@@ -342,7 +363,12 @@ class Indexer( object ):
         s.commit()
         s.close()
         log.debug( 'deletion-post complete; response, ```{}```'.format(response) )
-        process_status_updater.update_single_status( inscription_id=file_id, status='deletion-processed', status_detail=response )
+        status_str: str = ''
+        if type(response) == str:
+            status_str = response  # type: ignore
+        else:
+            status_str = repr( response )
+        process_status_updater.update_single_status( inscription_id=file_id, status='deletion-processed', status_detail=status_str )
         return
 
     ## end class Indexer()
@@ -486,6 +512,7 @@ def run_backup_statuses( files_to_update, files_to_remove ):
         Note: Files to remove will be enqueued first.
               This will properly handle a file that is removed, then re-added. """
     log.debug( 'starting run_backup_statuses()' )
+    status_json = '{}'
     try:
         status_json = backupper.make_backup()  # includes all statuses of all known files
         log.debug( 'original_status_json, ``%s``' % status_json )
