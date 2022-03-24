@@ -1,17 +1,17 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals
+"""
+Usage: % python3 ./iip_processing_app/lib/queue_utils/output_job_queue.py
+"""
 
 import os, pprint
 import redis, rq
 
 
-QUEUE_NAME = unicode( os.environ['IIP_PRC__QUEUE_NAME'] )
+QUEUE_NAME = os.environ['IIP_PRC__QUEUE_NAME']
 
 
 q = rq.Queue( QUEUE_NAME, connection=redis.Redis() )
 
-print '- number of jobs in queue `%s`: %s' % ( QUEUE_NAME, len(q.jobs) )
+print( f'- initial number of jobs in queue ``{QUEUE_NAME}``: ``{len(q.jobs)}``' )
 
 for job in q.jobs:
     job_d = {
@@ -29,5 +29,6 @@ for job in q.jobs:
         '_result': job._result,
         '_status': job._status,
     }
-    print '- job info...'; pprint.pprint( job_d )
-    print '---'
+    print( '- job info...' )
+    pprint.pprint( job_d )
+    print( '---' )

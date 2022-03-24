@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-
 """ Contains travis-ci.org friendly tests. """
 
 import base64, json, logging, os
@@ -47,19 +45,38 @@ class GHValidatorTest(TestCase):
 
     def test_parse_http_basic_auth(self):
         """ Checks parsing of username and password. """
-        encoded_string = base64.encodestring( '{usrnm}:{psswd}'.format(usrnm='username_foo', psswd='password_bar') ).replace( '\n', '' )
-        basic_auth_string = 'Basic {}'.format( encoded_string )
-        log.debug( 'basic_auth_string, ```{}```'.format(basic_auth_string) )
+        userpass_utf8 = '{usrnm}:{psswd}'.format( usrnm='username_foo', psswd='password_bar' ).encode( 'utf-8' )
+        log.debug( f'userpass_utf8, ``{userpass_utf8}``' )
+
+        b64_utf8_a = base64.encodebytes( userpass_utf8 )
+        assert type(b64_utf8_a) == bytes, type(b64_utf8_a)
+
+        b64_a = b64_utf8_a.decode( 'utf-8' )
+        b64_b = b64_a.replace( '\n', '' )
+        log.debug( f'b64_b, ``{b64_b}``' )
+
+        basic_auth_string = f'Basic {b64_b}'
+        log.debug( f'basic_auth_string, ``{basic_auth_string}``' )
         self.assertEqual(
             { 'received_username': 'username_foo', 'received_password': 'password_bar' },
             gh_validator.parse_http_basic_auth( basic_auth_string )
         )
 
+    # def test_parse_http_basic_auth(self):
+    #     """ Checks parsing of username and password. """
+    #     encoded_string = base64.encodestring( '{usrnm}:{psswd}'.format(usrnm='username_foo', psswd='password_bar') ).replace( '\n', '' )
+    #     basic_auth_string = 'Basic {}'.format( encoded_string )
+    #     log.debug( 'basic_auth_string, ```{}```'.format(basic_auth_string) )
+    #     self.assertEqual(
+    #         { 'received_username': 'username_foo', 'received_password': 'password_bar' },
+    #         gh_validator.parse_http_basic_auth( basic_auth_string )
+    #     )
+
     def test_parse_signature(self):
         """ Checks parsing of github's X-Hub-Signature header.
             Note: hmac requires a byte-string secret. """
         dummy_secret = 'foo_secret'
-        dummy_payload = unicode( json.dumps({ 'foo': 'bar' }) )
+        dummy_payload = json.dumps({ 'foo': 'bar' })
         dummy_signature = 'sha1=6ef7bc87b6a827c49de558766f2229f8d3e5e81c'
         log.debug( 'type(dummy_signature), ```{}```'.format(type(dummy_signature)) )
         self.assertEqual(
@@ -160,7 +177,7 @@ class PrepperUnitTest(TestCase):
     """ Checks travis-friendly processor.py functions. """
 
     def setUp(self):
-        self.xml_dir = unicode( os.environ['IIP_PRC__CLONED_INSCRIPTIONS_PATH'] )
+        self.xml_dir = os.environ['IIP_PRC__CLONED_INSCRIPTIONS_PATH']
 
     def test_update_status(self):
         """ Checks addition of display_status. """

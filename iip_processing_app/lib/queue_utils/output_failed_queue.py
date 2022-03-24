@@ -1,12 +1,12 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals
+"""
+Usage: % python3 ./iip_processing_app/lib/queue_utils/output_failed_queue.py
+"""
 
 import os, pprint
 import redis, rq
 
 
-QUEUE_NAME = unicode( os.environ['IIP_PRC__QUEUE_NAME'] )
+QUEUE_NAME = os.environ['IIP_PRC__QUEUE_NAME']
 
 
 failed_queue = rq.queue.get_failed_queue( connection=redis.Redis('localhost') )

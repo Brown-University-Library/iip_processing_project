@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-
 import json, logging, os, pprint
 from django.core.urlresolvers import reverse
 from iip_processing_app.lib import processor

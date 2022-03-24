@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-
 """ Contains tests for git-pulls and rq processing. """
 
 import logging, os, time
@@ -22,7 +20,7 @@ class PrepperOtherTest(TestCase):
     """ Checks processor.py functions that depend on git-pulls or rq jobs. """
 
     def setUp(self):
-        self.queue_name = unicode( os.environ['IIP_PRC__QUEUE_NAME'] )
+        self.queue_name = os.environ['IIP_PRC__QUEUE_NAME']
 
     def test_good_transform_xml(self):
         """ Checks transform with good source-xml and good-stylesheet.
@@ -50,7 +48,7 @@ class PrepperOtherTest(TestCase):
         try:
             unicode_doc = prepper.make_initial_solr_doc( source_xml )
         except Exception as e:
-            self.assertTrue( 'No such file or directory' in unicode(e) )
+            self.assertTrue( 'No such file or directory' in repr(e) )
 
     def test_call_git_pull(self):
         """ Checks for successful pull. """

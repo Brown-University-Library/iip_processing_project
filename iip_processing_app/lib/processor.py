@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-
 """
 Triggered by:
 -  views.gh_inscription_watcher() -> GHHelper.handle_inscription_update()
@@ -19,10 +17,15 @@ from lxml import etree
 
 
 log = logging.getLogger(__name__)
-if not logging._handlers:  # true when module accessed by queue-jobs
-    worker_config_dct = json.loads( os.environ['IIP_PRC__JOB_LOG_CONFIG_JSON'] )
-    worker_config_dct['loggers']['iip_processing_app']['level'] = unicode( os.environ[u'IIP_PRC__LOG_LEVEL'] )
-    logging.config.dictConfig( worker_config_dct )
+
+# if not logging.handlers:  # true when module accessed by queue-jobs
+#     worker_config_dct = json.loads( os.environ['IIP_PRC__JOB_LOG_CONFIG_JSON'] )
+#     worker_config_dct['loggers']['iip_processing_app']['level'] = os.environ[u'IIP_PRC__LOG_LEVEL']
+#     logging.config.dictConfig( worker_config_dct )
+
+worker_config_dct = json.loads( os.environ['IIP_PRC__JOB_LOG_CONFIG_JSON'] )
+worker_config_dct['loggers']['iip_processing_app']['level'] = os.environ[u'IIP_PRC__LOG_LEVEL']
+logging.config.dictConfig( worker_config_dct )
 
 
 class Puller( object ):
@@ -30,7 +33,23 @@ class Puller( object ):
 
     def __init__( self ):
         """ Settings. """
-        self.GIT_CLONED_DIR_PATH = unicode( os.environ['IIP_PRC__CLONED_INSCRIPTIONS_PATH'] )
+        self.GIT_CLONED_DIR_PATH = os.environ['IIP_PRC__CLONED_INSCRIPTIONS_PATH']
+
+    # def call_git_pull( self ):
+    #     """ Runs git_pull.
+    #             Returns list of filenames.
+    #         Called by run_call_git_pull(). """
+    #     log.debug( 'starting call_git_pull()' )
+    #     original_directory = os.getcwd()
+    #     log.debug( 'original_directory, ```{}```'.format(original_directory) )
+    #     os.chdir( self.GIT_CLONED_DIR_PATH )
+    #     log.debug( 'temp directory, ```{}```'.format(os.getcwd()) )
+    #     command = 'git pull'
+    #     r = envoy.run( command.encode('utf-8') )  # envoy requires strings
+    #     track_dct = self.track_envoy_call( r )
+    #     os.chdir( original_directory )
+    #     log.debug( 'directory after change-back, ```{}```'.format(os.getcwd()) )
+    #     return track_dct['status_code']
 
     def call_git_pull( self ):
         """ Runs git_pull.
@@ -38,11 +57,12 @@ class Puller( object ):
             Called by run_call_git_pull(). """
         log.debug( 'starting call_git_pull()' )
         original_directory = os.getcwd()
-        log.debug( 'original_directory, ```{}```'.format(original_directory) )
+        log.debug( f'original_directory, ``{original_directory}``' )
         os.chdir( self.GIT_CLONED_DIR_PATH )
-        log.debug( 'temp directory, ```{}```'.format(os.getcwd()) )
+        log.debug( f'temp directory, ``{os.getcwd()}``' )
         command = 'git pull'
-        r = envoy.run( command.encode('utf-8') )  # envoy requires strings
+        # r = envoy.run( command.encode('utf-8') )  # envoy requires bytes
+        r = envoy.run( command )
         track_dct = self.track_envoy_call( r )
         os.chdir( original_directory )
         log.debug( 'directory after change-back, ```{}```'.format(os.getcwd()) )
@@ -53,10 +73,10 @@ class Puller( object ):
             Called by call_git_pull() """
         track_dct = {
             'status_code': envoy_response.status_code,  # int
-            'std_out': envoy_response.std_out.decode(u'utf-8'),
-            'std_err': envoy_response.std_err.decode(u'utf-8'),
-            'command': envoy_response.command,  # list
-            'history': envoy_response.history  # list
+            'std_out': envoy_response.std_out,
+            'std_err': envoy_response.std_err,
+            'command': envoy_response.command,          # list
+            'history': envoy_response.history           # list
         }
         log.debug( 'envoy response, ```{}```'.format(pprint.pformat(track_dct)) )
         return track_dct
@@ -70,11 +90,11 @@ class StatusBackupper( object ):
 
     def __init__( self ):
         """ Settings. """
-        self.SOLR_URL = unicode( os.environ['IIP_PRC__SOLR_URL'] )
-        self.DISPLAY_STATUSES_BACKUP_DIR = unicode( os.environ['IIP_PRC__DISPLAY_STATUSES_BACKUP_DIR'] )
-        self.STATUSES_GIST_URL = unicode( os.environ['IIP_PRC__STATUSES_GIST_URL'] )
-        self.STATUSES_GIST_USERNAME = unicode( os.environ['IIP_PRC__STATUSES_GIST_USERNAME'] )
-        self.STATUSES_GIST_PASSWORD = unicode( os.environ['IIP_PRC__STATUSES_GIST_PASSWORD'] )
+        self.SOLR_URL = os.environ['IIP_PRC__SOLR_URL']
+        self.DISPLAY_STATUSES_BACKUP_DIR = os.environ['IIP_PRC__DISPLAY_STATUSES_BACKUP_DIR']
+        self.STATUSES_GIST_URL = os.environ['IIP_PRC__STATUSES_GIST_URL']
+        self.STATUSES_GIST_USERNAME = os.environ['IIP_PRC__STATUSES_GIST_USERNAME']
+        self.STATUSES_GIST_PASSWORD = os.environ['IIP_PRC__STATUSES_GIST_PASSWORD']
         self.DISPLAY_STATUSES_BACKUP_TIMEFRAME_IN_DAYS = int( os.environ['IIP_PRC__DISPLAY_STATUSES_BACKUP_TIMEFRAME_IN_DAYS'] )
 
     def make_backup( self ):
@@ -131,9 +151,9 @@ class StatusBackupper( object ):
         """ Saves statuses to gist.
             Called by make_backup(). """
         log.debug( 'starting gist update' )
-        auth = requests.auth.HTTPBasicAuth( self.STATUSES_GIST_USERNAME, self.STATUSES_GIST_PASSWORD )
+        auth = requests.auth.HTTPBasicAuth( self.STATUSES_GIST_USERNAME, self.STATUSES_GIST_PASSWORD )  # type: ignore
         json_payload = json.dumps( {
-            'description': '{} -- iip display statuses'.format(unicode(datetime.datetime.now())),
+            'description': '{} -- iip display statuses'.format(str(datetime.datetime.now())),
             'files': {
                 'iip_display_statuses.json': { 'content': status_json },
             }
@@ -147,7 +167,8 @@ class StatusBackupper( object ):
             Called by make_backup().
             TODO: eventually commit status_json to a repo, and push to github, streamlining local and external backup. """
         log.debug( 'starting local save' )
-        filename = 'display_statuses_backup_{}.json'.format( unicode(datetime.datetime.now()) ).replace( ' ', '_' )
+        # filename = 'display_statuses_backup_{}.json'.format( unicode(datetime.datetime.now()) ).replace( ' ', '_' )
+        filename = 'display_statuses_backup_{}.json'.format( str(datetime.datetime.now()) ).replace( ' ', '_' )
         filepath = '{dir}/{fname}'.format( dir=self.DISPLAY_STATUSES_BACKUP_DIR, fname=filename )
         log.debug( 'filepath, ```{}```'.format(filepath) )
         with open( filepath, 'w' ) as f:
@@ -162,7 +183,7 @@ class StatusBackupper( object ):
         seconds_in_day = 60 * 60 * 24
         timeframe_days = seconds_in_day * self.DISPLAY_STATUSES_BACKUP_TIMEFRAME_IN_DAYS
         backup_files = os.listdir( self.DISPLAY_STATUSES_BACKUP_DIR )
-        backup_files = [ unicode(x) for x in backup_files ]
+        backup_files = [ x for x in backup_files ]
         for backup_filename in backup_files:
             backup_filepath = '{dir}/{fname}'.format( dir=self.DISPLAY_STATUSES_BACKUP_DIR, fname=backup_filename )
             if os.stat( backup_filepath ).st_mtime < (now - timeframe_days):
@@ -176,10 +197,10 @@ class Prepper( object ):
     """ Manages prep for solr post. """
 
     def __init__( self ):
-        self.XML_DIR = unicode( os.environ['IIP_PRC__CLONED_INSCRIPTIONS_PATH'] )
-        self.STYLESHEET_PATH = unicode( os.environ['IIP_PRC__SOLR_DOC_STYLESHEET_PATH'] )
-        self.TRANSFORMER_URL = unicode( os.environ['IIP_PRC__TRANSFORMER_URL'] )
-        self.TRANSFORMER_AUTH_KEY = unicode( os.environ['IIP_PRC__TRANSFORMER_AUTH_KEY'] )
+        self.XML_DIR = os.environ['IIP_PRC__CLONED_INSCRIPTIONS_PATH']
+        self.STYLESHEET_PATH = os.environ['IIP_PRC__SOLR_DOC_STYLESHEET_PATH']
+        self.TRANSFORMER_URL = os.environ['IIP_PRC__TRANSFORMER_URL']
+        self.TRANSFORMER_AUTH_KEY = os.environ['IIP_PRC__TRANSFORMER_AUTH_KEY']
 
     def make_solr_data( self, file_id, status_json ):
         """ Manages preparation of solr data.
@@ -205,45 +226,95 @@ class Prepper( object ):
     def grab_inscription( self, file_id ):
         """ Returns inscription xml.
             Called by make_solr_data() """
+        assert type(file_id) == str, type(file_id)
         filepath = '{dir}/epidoc-files/{file_id}.xml'.format( dir=self.XML_DIR, file_id=file_id )
         with open( filepath ) as f:
-            xml_utf8 = f.read()
-        xml = xml_utf8.decode( 'utf-8' )
+            xml = f.read()
+            assert type(xml) == str; type(xml)
         log.debug( 'source_xml, ```{}```'.format(xml) )
         return xml
+
+    # def grab_inscription( self, file_id ):
+    #     """ Returns inscription xml.
+    #         Called by make_solr_data() """
+    #     filepath = '{dir}/epidoc-files/{file_id}.xml'.format( dir=self.XML_DIR, file_id=file_id )
+    #     with open( filepath ) as f:
+    #         xml_utf8 = f.read()
+    #     xml = xml_utf8.decode( 'utf-8' )
+    #     log.debug( 'source_xml, ```{}```'.format(xml) )
+    #     return xml
 
     def make_initial_solr_doc( self, source_xml ):
         """ Returns result of xsl transform.
             Called by make_solr_data() """
-        log.debug( 'stylesheet_path, ```{}```'.format(self.STYLESHEET_PATH) )
-        log.debug( 'transformer url, ```{}```'.format(self.TRANSFORMER_URL) )
+        assert type(source_xml) == str, type(source_xml)
+        log.debug( f'stylesheet_path, ``{self.STYLESHEET_PATH}``' )
+        log.debug( f'transformer url, ``{self.TRANSFORMER_URL}``' )
         try:
+            stylesheet = ''
             with open( self.STYLESHEET_PATH ) as f:
-                stylesheet_utf8 = f.read()
-            stylesheet = stylesheet_utf8.decode( 'utf-8' )
+                stylesheet = f.read()
+                assert type(stylesheet) == str, type(stylesheet)
             payload = {
                 'xml': source_xml, 'xsl': stylesheet, 'auth_key': self.TRANSFORMER_AUTH_KEY }
             r = requests.post( self.TRANSFORMER_URL, data=payload )
             transformed_xml = r.content.decode( 'utf-8' )
         except Exception as e:
-            message = 'exception making initial_solr_doc, ```%s```' % e
-            log.error( message )
+            message = 'exception making initial_solr_doc, ``%s``' % repr(e)
+            log.exception( message )
             raise Exception( message )
-        log.debug( 'transformed_xml, ```{}```'.format(transformed_xml) )
+        log.debug( f'transformed_xml, ``{transformed_xml}``' )
         return transformed_xml
+
+    # def make_initial_solr_doc( self, source_xml ):
+    #     """ Returns result of xsl transform.
+    #         Called by make_solr_data() """
+    #     assert type(source_xml) == str, type(source_xml)
+    #     log.debug( f'stylesheet_path, ``{self.STYLESHEET_PATH}``' )
+    #     log.debug( f'transformer url, ``{self.TRANSFORMER_URL}``' )
+    #     try:
+    #         stylesheet = ''
+    #         with open( self.STYLESHEET_PATH ) as f:
+    #             stylesheet = f.read()
+    #         payload = {
+    #             'xml': source_xml, 'xsl': stylesheet, 'auth_key': self.TRANSFORMER_AUTH_KEY }
+    #         r = requests.post( self.TRANSFORMER_URL, data=payload )
+    #         transformed_xml = r.content.decode( 'utf-8' )
+    #     except Exception as e:
+    #         message = 'exception making initial_solr_doc, ``%s``' % repr(e)
+    #         log.exception( message )
+    #         raise Exception( message )
+    #     log.debug( f'transformed_xml, ``{transformed_xml}``' )
+    #     return transformed_xml
 
     def update_status( self, display_status, initial_solr_xml ):
         """ Updates initial solr-xml with display-status.
             Called by make_solr_data() """
-        doc = etree.fromstring( initial_solr_xml.encode('utf-8') )  # can't take unicode string due to xml file's encoding declaration
+        assert type(display_status) == str, type(display_status)
+        assert type(initial_solr_xml) == str, type(initial_solr_xml)
+        doc = etree.fromstring( initial_solr_xml.encode('utf-8'), parser=None )  # can't take unicode string due to xml file's encoding declaration
         node = doc.xpath( '//doc' )[0]
-        new_field = etree.SubElement( node, 'field' )
+        # new_field = etree.SubElement( node, 'field' )
+        new_field = etree.SubElement( node, 'field', attrib={} )  # type: ignore
         new_field.attrib['name'] = 'display_status'
         new_field.text = display_status
-        utf8_xml = etree.tostring( doc, encoding='UTF-8', xml_declaration=True, pretty_print=False )
+        utf8_xml = etree.tostring( doc, encoding='UTF-8', xml_declaration=True, pretty_print=False )  # type: ignore
         statused_xml = utf8_xml.decode( 'utf-8' )
         log.debug( 'statused_xml, ```{}```'.format(statused_xml) )
         return statused_xml
+
+    # def update_status( self, display_status, initial_solr_xml ):
+    #     """ Updates initial solr-xml with display-status.
+    #         Called by make_solr_data() """
+    #     doc = etree.fromstring( initial_solr_xml.encode('utf-8') )  # can't take unicode string due to xml file's encoding declaration
+    #     node = doc.xpath( '//doc' )[0]
+    #     new_field = etree.SubElement( node, 'field' )
+    #     new_field.attrib['name'] = 'display_status'
+    #     new_field.text = display_status
+    #     utf8_xml = etree.tostring( doc, encoding='UTF-8', xml_declaration=True, pretty_print=False )
+    #     statused_xml = utf8_xml.decode( 'utf-8' )
+    #     log.debug( 'statused_xml, ```{}```'.format(statused_xml) )
+    #     return statused_xml
 
     ## end class Prepper()
 
@@ -252,7 +323,21 @@ class Indexer( object ):
     """ Manages solr calls. """
 
     def __init__( self ):
-        self.SOLR_URL = unicode( os.environ['IIP_PRC__SOLR_URL'] )
+        self.SOLR_URL = os.environ['IIP_PRC__SOLR_URL']
+
+    # def update_entry( self, inscription_id, solr_xml ):
+    #     """ Posts xml to solr.
+    #         Called by run_update_index_file() """
+    #     update_url = '{}/update/?commit=true'.format( self.SOLR_URL )
+    #     log.debug( 'solr update url, ```{}```'.format(update_url) )
+    #     headers = { 'content-type'.encode('utf-8'): 'text/xml; charset=utf-8'.encode('utf-8') }  # from testing, NON-unicode-string posts were bullet-proof
+    #     r = requests.post(
+    #         update_url.encode(u'utf-8'), headers=headers, data=solr_xml.encode('utf-8') )
+    #     result_dct = {
+    #         'response_status_code': r.status_code, 'response_text': r.content.decode('utf-8') }
+    #     log.debug( 'solr response result_dct, ```{}```'.format(pprint.pformat(result_dct)) )
+    #     process_status_updater.update_single_status( inscription_id=inscription_id, status='update-processed', status_detail=result_dct )
+    #     return
 
     def update_entry( self, inscription_id, solr_xml ):
         """ Posts xml to solr.
@@ -265,7 +350,8 @@ class Indexer( object ):
         result_dct = {
             'response_status_code': r.status_code, 'response_text': r.content.decode('utf-8') }
         log.debug( 'solr response result_dct, ```{}```'.format(pprint.pformat(result_dct)) )
-        process_status_updater.update_single_status( inscription_id=inscription_id, status='update-processed', status_detail=result_dct )
+        status_str: str = repr( result_dct )
+        process_status_updater.update_single_status( inscription_id=inscription_id, status='update-processed', status_detail=status_str )
         return
 
     def delete_entry( self, file_id ):
@@ -277,7 +363,12 @@ class Indexer( object ):
         s.commit()
         s.close()
         log.debug( 'deletion-post complete; response, ```{}```'.format(response) )
-        process_status_updater.update_single_status( inscription_id=file_id, status='deletion-processed', status_detail=response )
+        status_str: str = ''
+        if type(response) == str:
+            status_str = response  # type: ignore
+        else:
+            status_str = repr( response )
+        process_status_updater.update_single_status( inscription_id=file_id, status='deletion-processed', status_detail=status_str )
         return
 
     ## end class Indexer()
@@ -421,6 +512,7 @@ def run_backup_statuses( files_to_update, files_to_remove ):
         Note: Files to remove will be enqueued first.
               This will properly handle a file that is removed, then re-added. """
     log.debug( 'starting run_backup_statuses()' )
+    status_json = '{}'
     try:
         status_json = backupper.make_backup()  # includes all statuses of all known files
         log.debug( 'original_status_json, ``%s``' % status_json )

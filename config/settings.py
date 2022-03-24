@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
 """
 Django settings for iip_processing_project.
 
@@ -122,7 +121,7 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 ## disable module loggers
 # existing_logger_names = logging.getLogger().manager.loggerDict.keys()
-# print '- EXISTING_LOGGER_NAMES, `%s`' % existing_logger_names
+# print( f'- EXISTING_LOGGER_NAMES, ``{existing_logger_names}``' )
 logging.getLogger('requests').setLevel( logging.WARNING )
 
 LOGGING = {
