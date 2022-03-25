@@ -18,11 +18,12 @@ try:
 
     failed_queue = rq.queue.get_failed_queue( connection=redis.Redis('localhost') )
 
-    d = { 'jobs': [] }
-    failed_count = 0
+    output_dct: dict = { 'jobs': [], 'number_of_failed_jobs_deleted': 0 }
+    failed_count: int = 0
+    failed_iip_jobs: list = []
     for job in failed_queue.jobs:
-        print( 'hereA' )
         if not job.origin == QUEUE_NAME:
+            print( f'job.id, ``{job._id}`` not a failed iip job; skipping' )
             continue
         failed_count += 1
         job_d = {
@@ -40,20 +41,17 @@ try:
             '_result': job._result,
             '_status': job._status,
         }
-        d['jobs'].append( job_d )
+        failed_iip_jobs.append( job_d )
         job.delete()
-    d['initial_failed_target_count'] = failed_count
+    output_dct['jobs'] = failed_iip_jobs
+    output_dct['number_of_failed_iip_jobs_deleted'] = failed_count
 
     # q2 = rq.Queue( QUEUE_NAME, connection=redis.Redis() )
     # d['current_failed_target_count'] = len(q2.jobs)
 
-    failed_queue_2 = rq.queue.get_failed_queue( connection=redis.Redis('localhost') )
-    d['current_failed_target_count'] = len(failed_queue_2.jobs)
-
-    pprint.pprint( d )
+    pprint.pprint( output_dct )
 
 except Exception as e:
     message = f'Exception cleaning failed queue, ``{repr(e)}``'
     print( message )
     log.exception( message )
-

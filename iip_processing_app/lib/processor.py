@@ -205,12 +205,24 @@ class Prepper( object ):
     def make_solr_data( self, file_id, status_json ):
         """ Manages preparation of solr data.
             Called by run_prep_file() """
+        log.debug( 'starting make_solr_data()' )
         display_status = self.determine_display_status( file_id, status_json )
         source_xml = self.grab_inscription( file_id )
         initial_solr_doc = self.make_initial_solr_doc( source_xml )
         statused_solr_doc = self.update_status( display_status, initial_solr_doc )
         process_status_updater.update_single_status( inscription_id=file_id, status='data-prepared', status_detail='' )
+        log.debug( 'leaving make_solr_data()' )
         return statused_solr_doc
+
+    # def make_solr_data( self, file_id, status_json ):
+    #     """ Manages preparation of solr data.
+    #         Called by run_prep_file() """
+    #     display_status = self.determine_display_status( file_id, status_json )
+    #     source_xml = self.grab_inscription( file_id )
+    #     initial_solr_doc = self.make_initial_solr_doc( source_xml )
+    #     statused_solr_doc = self.update_status( display_status, initial_solr_doc )
+    #     process_status_updater.update_single_status( inscription_id=file_id, status='data-prepared', status_detail='' )
+    #     return statused_solr_doc
 
     def determine_display_status( self, file_id, status_json ):
         """ Returns display_status
