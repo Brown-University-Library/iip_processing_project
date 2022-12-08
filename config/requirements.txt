@@ -4,30 +4,30 @@
 #
 #    pip-compile ./config/requirements.in
 #
-certifi==2021.10.8
+certifi==2022.12.7
     # via requests
 charset-normalizer==2.0.11
     # via requests
 click==7.1.2
     # via
-    #   -r ./config/requirements.in
+    #   -r requirements.in
     #   rq
 deprecated==1.2.13
     # via redis
 django==1.11.29
-    # via -r ./config/requirements.in
+    # via -r requirements.in
 envoy==0.0.3
-    # via -r ./config/requirements.in
+    # via -r requirements.in
 future==0.18.2
     # via solrpy
 idna==3.3
     # via requests
 lxml==4.7.1
-    # via -r ./config/requirements.in
+    # via -r requirements.in
 packaging==21.3
     # via redis
 pymysql==1.0.2
-    # via -r ./config/requirements.in
+    # via -r requirements.in
 pyparsing==3.0.7
     # via packaging
 pytz==2021.3
@@ -36,18 +36,18 @@ pyyaml==6.0
     # via solrpy
 redis==4.1.3
     # via
-    #   -r ./config/requirements.in
+    #   -r requirements.in
     #   rq
 requests==2.27.1
-    # via -r ./config/requirements.in
+    # via -r requirements.in
 rq==0.13.0
-    # via -r ./config/requirements.in
+    # via -r requirements.in
 shellvars-py @ git+https://github.com/birkin/shellvars-py.git@v0.2
-    # via -r ./config/requirements.in
+    # via -r requirements.in
 six==1.16.0
     # via solrpy
 solrpy==1.0.0
-    # via -r ./config/requirements.in
+    # via -r requirements.in
 urllib3==1.26.8
     # via requests
 wrapt==1.13.3
