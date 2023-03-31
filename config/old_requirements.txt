@@ -2,7 +2,7 @@ Django==1.11.29
 envoy==0.0.3
 lxml==3.7.2
 PyMySQL==0.10.1
-redis==2.10.5
+redis==4.4.4
 requests==2.22.0
 rq==0.7.1
 shellvars-py==0.1.2
