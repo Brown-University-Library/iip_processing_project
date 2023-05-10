@@ -5,7 +5,14 @@ This code checks:
 - that expected workers are running.
 """
 
-import subprocess
+import logging, subprocess
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='[%(asctime)s] %(levelname)s [%(module)s-%(funcName)s()::%(lineno)d] %(message)s',
+    datefmt='%d/%b/%Y %H:%M:%S' )
+log = logging.getLogger( '__name__' )
+
 
 expectation = {
     'expected_queues': [ 'aa', 'bb', 'cc' ],
@@ -17,9 +24,9 @@ def run_code():
     assert type(redis_check) == str
     assert type(queues) == list
     assert type(workers) == list
-    print('Queues:', queues)
-    print('Workers:', workers)
-    print('Redis:', redis_check)
+    log.debug( f'redis check: ``{redis_check}``' )
+    log.debug( f'queues: ``{queues}``' )
+    log.debug( f'workers: ``{workers}``' )
     return_tuple = (redis_check, queues, workers)
     return return_tuple
 
