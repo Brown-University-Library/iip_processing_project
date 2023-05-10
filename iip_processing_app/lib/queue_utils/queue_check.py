@@ -20,6 +20,8 @@ def run_code():
     print('Queues:', queues)
     print('Workers:', workers)
     print('Redis:', redis_check)
+    return_tuple = (redis_check, queues, workers)
+    return return_tuple
 
 
 def get_rqinfo():
