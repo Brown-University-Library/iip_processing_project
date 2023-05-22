@@ -3,7 +3,7 @@ envoy==0.0.3
 lxml==3.7.2
 PyMySQL==0.10.1
 redis==2.10.5
-requests==2.22.0
+requests==2.31.0
 rq==0.7.1
 shellvars-py==0.1.2
 solrpy==0.9.7
