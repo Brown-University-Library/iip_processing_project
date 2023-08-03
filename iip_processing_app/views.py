@@ -89,6 +89,7 @@ def update_processing_status( request ):
 
 def delete_solr_orphans( request ):
     """ Manages initial request to delete orphaned records from solr. """
+    log.debug( '\n\nstarting delete_solr_orphans()' )
     request.session['ids_to_delete'] = json.dumps( [] )
     resp = HttpResponseForbidden( '403 / Forbidden' )
     ( eppn, dev_user, host ) = ( request.META.get('Shibboleth-eppn', ''), request.GET.get('dev_auth_hack', ''), request.get_host() )
