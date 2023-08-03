@@ -107,13 +107,30 @@ def process_solr_deletions( request ):
     """ Triggers actual deletion-processing.
         Called by clicking the go-ahead-and-delete button in views.delete_solr_orphans()
         The POST requirement, combined with built-in csrf protection, is enough to ensure hits are valid. """
+    log.debug( '\n\nstarting process_solr_deletions()' )
     resp = HttpResponseForbidden( '403 / Forbidden' )
     if request.method == 'POST':
-        orphan_deleter.run_deletes( json.loads(request.session.get('ids_to_delete')) )
+        data = json.loads( request.session.get('ids_to_delete') )
+        log.debug( f'data, ```{pprint.pformat(data)}```' )
+        orphan_deleter.run_deletes( data )
         resp = HttpResponse( 'deletions completed' )
     request.session['ids_to_delete'] = json.dumps( [] )
     log.debug( 'resp.__dict__, ```{}```'.format(pprint.pformat(resp.__dict__)) )
     return resp
+
+
+# def process_solr_deletions( request ):
+#     """ Triggers actual deletion-processing.
+#         Called by clicking the go-ahead-and-delete button in views.delete_solr_orphans()
+#         The POST requirement, combined with built-in csrf protection, is enough to ensure hits are valid. """
+#     log.debug( '\n\nstarting process_solr_deletions()' )
+#     resp = HttpResponseForbidden( '403 / Forbidden' )
+#     if request.method == 'POST':
+#         orphan_deleter.run_deletes( json.loads(request.session.get('ids_to_delete')) )
+#         resp = HttpResponse( 'deletions completed' )
+#     request.session['ids_to_delete'] = json.dumps( [] )
+#     log.debug( 'resp.__dict__, ```{}```'.format(pprint.pformat(resp.__dict__)) )
+#     return resp
 
 
 def view_processing( request ):
