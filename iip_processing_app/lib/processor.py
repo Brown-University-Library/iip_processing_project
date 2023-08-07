@@ -442,10 +442,11 @@ class ProcessStatusUpdater( object ):
         log.debug( 'url, ``{url}``' )
         payload = {
             'inscription_id': inscription_id, 'status_summary': status, 'status_detail': status_detail }
-        log.debug( 'payload, ```{pprint.pformat(payload)}``' )
+        log.debug( f'payload, ```{pprint.pformat(payload)}``' )
         try:
-            r = requests.post( url, data=json.dumps(payload) )
-            log.debug( 'post-result, ``{r.status_code}``' )
+            # r = requests.post( url, data=json.dumps(payload) )
+            r = requests.post(url, data=json.dumps(payload), timeout=10)
+            log.debug( f'post-result, ``{r.status_code}``' )
         except Exception as e:
             log.exception( 'exception on post; traceback follows; processing will continue' )
         log.debug( 'leaving update_single_status()' )
