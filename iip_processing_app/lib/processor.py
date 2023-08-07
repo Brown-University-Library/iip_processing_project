@@ -439,7 +439,7 @@ class ProcessStatusUpdater( object ):
         log.debug( f'status, ``{status}``; type(status), ``{type(status)}``' )
         log.debug( f'status_detail, ``{status_detail}``; type(status_detail), ``{type(status_detail)}``' )
         url = self.PROCESS_STATUS_UPDATER_URL
-        log.debug( 'url, ``{url}``' )
+        log.debug( f'url, ``{url}``' )
         payload = {
             'inscription_id': inscription_id, 'status_summary': status, 'status_detail': status_detail }
         log.debug( f'payload, ```{pprint.pformat(payload)}``' )
