@@ -35,6 +35,7 @@ class OrphanDeleter( object ):
     def prep_data( self ):
         """ Prepares list of ids to be deleted from solr.
             Called by views.delete_solr_orphans() """
+        log.debug( 'starting prep_data()' )
         file_system_ids = self.build_directory_inscription_ids()
         solr_inscription_ids = self.build_solr_inscription_ids()
         orphans = self.build_orphan_list( file_system_ids, solr_inscription_ids )
@@ -95,9 +96,12 @@ class OrphanDeleter( object ):
     def run_deletes( self, id_lst ):
         """ Runs deletions.
             Called by views.delete_solr_orphans() """
-        log.debug( 'id_lst, ```{}```'.format(pprint.pformat(id_lst)) )
+        # log.debug( 'id_lst, ```{}```'.format(pprint.pformat(id_lst)) )
+        log.debug( f'id_lst, ```{id_lst}```' )
         for inscription_id in id_lst:
+            log.debug( f'about to delete inscription_id, `{inscription_id}`' )
             indexer.delete_entry( inscription_id )
+            log.debug( 'solr-entry deleted' )
         return
 
     ## end class OrphanDeleter()

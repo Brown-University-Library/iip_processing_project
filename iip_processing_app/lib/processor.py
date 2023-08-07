@@ -354,9 +354,12 @@ class Indexer( object ):
     def update_entry( self, inscription_id, solr_xml ):
         """ Posts xml to solr.
             Called by run_update_index_file() """
+        log.debug( 'starting update_entry()' )
         update_url = '{}/update/?commit=true'.format( self.SOLR_URL )
         log.debug( 'solr update url, ```{}```'.format(update_url) )
         headers = { 'content-type'.encode('utf-8'): 'text/xml; charset=utf-8'.encode('utf-8') }  # from testing, NON-unicode-string posts were bullet-proof
+        log.debug( f'headers, ``{headers}``' )
+        log.debug( f'type(headers), ``{type(headers)}``' )
         r = requests.post(
             update_url.encode(u'utf-8'), headers=headers, data=solr_xml.encode('utf-8') )
         result_dct = {
@@ -364,24 +367,47 @@ class Indexer( object ):
         log.debug( 'solr response result_dct, ```{}```'.format(pprint.pformat(result_dct)) )
         status_str: str = repr( result_dct )
         process_status_updater.update_single_status( inscription_id=inscription_id, status='update-processed', status_detail=status_str )
+        log.debug( 'update_single_status() complete; returning from update_entry()' )
         return
 
     def delete_entry( self, file_id ):
         """ Deletes solr entry.
             Called by run_remove_index_file(() """
-        log.debug( 'file_id, `{}`'.format(file_id) )
+        log.debug( 'starting delete_entry with file_id, `{}`'.format(file_id) )
+        log.debug( f'solr url, ``{self.SOLR_URL}``' )
         s = solr.Solr( self.SOLR_URL )
         response = s.delete( file_id )
         s.commit()
+        log.debug( 's.commit() complete' )
         s.close()
+        log.debug( 's.close() complete' )
         log.debug( 'deletion-post complete; response, ```{}```'.format(response) )
         status_str: str = ''
         if type(response) == str:
             status_str = response  # type: ignore
         else:
             status_str = repr( response )
+        log.debug( f'status_str, ``{status_str}``' )
         process_status_updater.update_single_status( inscription_id=file_id, status='deletion-processed', status_detail=status_str )
+        log.debug( 'update_single_status() complete; returning from delete_entry()' )
         return
+
+    # def delete_entry( self, file_id ):
+    #     """ Deletes solr entry.
+    #         Called by run_remove_index_file(() """
+    #     log.debug( 'starting delete_entry with file_id, `{}`'.format(file_id) )
+    #     s = solr.Solr( self.SOLR_URL )
+    #     response = s.delete( file_id )
+    #     s.commit()
+    #     s.close()
+    #     log.debug( 'deletion-post complete; response, ```{}```'.format(response) )
+    #     status_str: str = ''
+    #     if type(response) == str:
+    #         status_str = response  # type: ignore
+    #     else:
+    #         status_str = repr( response )
+    #     process_status_updater.update_single_status( inscription_id=file_id, status='deletion-processed', status_detail=status_str )
+    #     return
 
     ## end class Indexer()
 
@@ -404,17 +430,39 @@ class ProcessStatusUpdater( object ):
         log.debug( 'post-status_code, ```{}```'.format(r.status_code) )
         return
 
-    def update_single_status( self, inscription_id, status, status_detail='' ):
+    def update_single_status( self, inscription_id, status, status_detail='' ) -> None:
         """ Updates status.
             Called when job is completed, by Indexer.indexer.update_entry()
             Eventually can be updated along the way. """
-        log.debug( 'url, ```{}```'.format(self.PROCESS_STATUS_UPDATER_URL) )
+        log.debug( 'starting update_single_status()' )
+        log.debug( f'inscription_id, ``{inscription_id}``; type(inscription_id), ``{type(inscription_id)}``' )
+        log.debug( f'status, ``{status}``; type(status), ``{type(status)}``' )
+        log.debug( f'status_detail, ``{status_detail}``; type(status_detail), ``{type(status_detail)}``' )
+        url = self.PROCESS_STATUS_UPDATER_URL
+        log.debug( f'url, ``{url}``' )
         payload = {
             'inscription_id': inscription_id, 'status_summary': status, 'status_detail': status_detail }
-        log.debug( 'payload, ```{}```'.format(pprint.pformat(payload)) )
-        r = requests.post( self.PROCESS_STATUS_UPDATER_URL, data=json.dumps(payload) )
-        log.debug( 'post-result, ```{}```'.format(r.status_code) )
+        log.debug( f'payload, ```{pprint.pformat(payload)}``' )
+        try:
+            # r = requests.post( url, data=json.dumps(payload) )
+            r = requests.post(url, data=json.dumps(payload), timeout=10)
+            log.debug( f'post-result, ``{r.status_code}``' )
+        except Exception as e:
+            log.exception( 'exception on post; traceback follows; processing will continue' )
+        log.debug( 'leaving update_single_status()' )
         return
+
+    # def update_single_status( self, inscription_id, status, status_detail='' ):
+    #     """ Updates status.
+    #         Called when job is completed, by Indexer.indexer.update_entry()
+    #         Eventually can be updated along the way. """
+    #     log.debug( 'url, ```{}```'.format(self.PROCESS_STATUS_UPDATER_URL) )
+    #     payload = {
+    #         'inscription_id': inscription_id, 'status_summary': status, 'status_detail': status_detail }
+    #     log.debug( 'payload, ```{}```'.format(pprint.pformat(payload)) )
+    #     r = requests.post( self.PROCESS_STATUS_UPDATER_URL, data=json.dumps(payload) )
+    #     log.debug( 'post-result, ```{}```'.format(r.status_code) )
+    #     return
 
     ## end class ProcessStatusUpdater()
 
